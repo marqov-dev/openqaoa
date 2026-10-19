@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from openqaoa import QAOA, create_device
+from openqaoa.algorithms.qaoa.qaoa_benchmark import QAOABenchmark
 from openqaoa.backends.wrapper import ZNEWrapper
 from openqaoa.problems import MaximumCut, QUBO
 from openqaoa.utilities import bitstring_energy
@@ -64,3 +65,25 @@ def test_builtin_simulators_agree_for_weighted_maxcut(seed):
         qaoa.compile(MaximumCut(graph).qubo)
         energies.append(qaoa.backend.expectation(qaoa.variate_params))
     np.testing.assert_allclose(energies[0], energies[1], atol=1e-10)
+
+
+def test_benchmark_plot_keeps_sample_centers_and_all_values():
+    import matplotlib.pyplot as plt
+
+    qaoa = QAOA()
+    qaoa.compile(MaximumCut(nx.cycle_graph(4)).qubo)
+    benchmark = QAOABenchmark(qaoa)
+    benchmark.run(n_points_axis=4, ranges=[(0, 1), (-1, 1)],
+                  run_reference=False, verbose=False)
+    figure, axis = benchmark.plot()
+    try:
+        figure.canvas.draw()
+        mesh = axis.collections[0]
+        np.testing.assert_allclose(np.asarray(mesh.get_array()).reshape(4, 4), benchmark.values)
+        coordinates = mesh.get_coordinates()
+        np.testing.assert_allclose((coordinates[0, :-1, 0] + coordinates[0, 1:, 0]) / 2,
+                                   np.linspace(0, 1, 4))
+        np.testing.assert_allclose((coordinates[:-1, 0, 1] + coordinates[1:, 0, 1]) / 2,
+                                   np.linspace(-1, 1, 4))
+    finally:
+        plt.close(figure)

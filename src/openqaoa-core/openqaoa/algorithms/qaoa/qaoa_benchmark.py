@@ -387,7 +387,7 @@ class QAOABenchmark:
             It is not available if the sweep is over more than one parameter.
             The default is False.
         plot_options : dict, optional
-            The options for the plot (plt.plot for one parameter, plt.pcolorfast for two parameters).
+            The options for the plot (plt.plot for one parameter, plt.pcolormesh for two parameters).
         """
 
         # check the inputs
@@ -523,7 +523,11 @@ class QAOABenchmark:
                             [i for i, r in enumerate(ranges) if len(r) == 2][1]
                         )
                     )
-                    plot = axis.pcolorfast(*axes, values[key][1], **plot_options)
+                    # Sweep coordinates are sample centers, not cell edges.
+                    # pcolorfast requires n+1 edges for n values; pcolormesh
+                    # can infer those edges explicitly with nearest shading.
+                    options = {"shading": "nearest", **plot_options}
+                    plot = axis.pcolormesh(*axes, values[key][1], **options)
                     _ = plt.colorbar(plot)
 
                 # set the title

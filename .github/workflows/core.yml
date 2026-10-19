@@ -4,11 +4,15 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, 'codex/core-restoration']
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: restored-core-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   core:

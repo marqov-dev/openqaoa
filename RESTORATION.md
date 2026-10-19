@@ -17,6 +17,8 @@ analytical simulator, QAOA/RQAOA, parametrizations, optimizers, problem encoding
 and result serialization. MaxCut zero edge weights are preserved, with an
 exhaustive small weighted-graph energy check. Analytical and statevector energies
 are compared independently for seeded, weighted instances.
+Benchmark heatmaps also use sample-centered mesh coordinates compatible with
+current Matplotlib; a regression checks that all values and sample centers survive plotting.
 
 The numerical compatibility window is intentionally bounded:
 
