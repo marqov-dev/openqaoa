@@ -1,14 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from qiskit import QuantumCircuit
+
 import random
 import numpy as np
 import json
 
-from mitiq.zne.inference import RichardsonFactory, LinearFactory, PolyExpFactory, PolyFactory, AdaExpFactory, FakeNodesFactory, ExpFactory
-from mitiq.zne.scaling import fold_gates_at_random
-from mitiq.zne import execute_with_zne
-
 import copy
-
-from qiskit import QuantumCircuit, transpile
 
 from .qaoa_backend import DEVICE_NAME_TO_OBJECT_MAPPER
 
@@ -32,7 +33,6 @@ from ..utilities import (
 )
 
 from .cost_function import cost_function
-from openqaoa_qiskit.backends.qaoa_qiskit_qpu import QAOAQiskitQPUBackend
 
 
 class BaseWrapper(VQABaseBackend):
@@ -104,6 +104,27 @@ class ZNEWrapper(BaseWrapper):
 
     def __init__(self, backend, factory, scaling, scale_factors, order, steps):
         super().__init__(backend)
+
+        # Mitigation is optional. Importing QAOA or using a built-in simulator
+        # must not require the Mitiq/Qiskit dependency stack.
+        try:
+            from mitiq.zne.inference import (
+                RichardsonFactory, LinearFactory, PolyExpFactory, PolyFactory,
+                AdaExpFactory, FakeNodesFactory, ExpFactory,
+            )
+            from mitiq.zne.scaling import fold_gates_at_random
+            from mitiq.zne import execute_with_zne
+            from qiskit import transpile
+            from openqaoa_qiskit.backends.qaoa_qiskit_qpu import QAOAQiskitQPUBackend
+        except ImportError as exc:
+            raise ImportError(
+                "Zero-noise extrapolation requires compatible Mitiq, Qiskit and "
+                "OpenQAOA Qiskit plugin installations. Install these optional "
+                "integrations before selecting mitiq_zne; built-in simulators "
+                "do not require them."
+            ) from exc
+        self._transpile = transpile
+        self._execute_with_zne = execute_with_zne
 
         # only qiskit backends are supported
         if(type(backend) not in [DEVICE_NAME_TO_OBJECT_MAPPER['qiskit.qasm_simulator'],  
@@ -187,9 +208,9 @@ class ZNEWrapper(BaseWrapper):
 
         qc = self.backend.qaoa_circuit(params)
         # for Mitiq integration, is necessary to transpile the circuit. Mitiq doesn't support the RZZ gate.
-        qc = transpile(qc, basis_gates=["h","rx","cx"])
+        qc = self._transpile(qc, basis_gates=["h","rx","cx"])
 
-        expectation = execute_with_zne(
+        expectation = self._execute_with_zne(
             circuit = qc,
             executor = executor,
             observable = None,

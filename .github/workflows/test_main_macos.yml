@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    if: github.repository == 'entropicalabs/openqaoa'
     strategy:
       fail-fast: false
       matrix:

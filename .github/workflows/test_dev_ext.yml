@@ -12,7 +12,7 @@ on:
 jobs:
   test-dev-ext:
     runs-on: ubuntu-latest
-    if : ${{ github.event.pull_request.head.repo.fork == true }}
+    if: github.repository == 'entropicalabs/openqaoa' && github.event.pull_request.head.repo.fork == true
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -57,7 +57,7 @@ jobs:
 
   docs-ext:
     runs-on: ubuntu-latest
-    if : github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork == true
+    if: github.repository == 'entropicalabs/openqaoa' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork == true
     steps:
       - name: Check out openqaoa
         uses: actions/checkout@v3
