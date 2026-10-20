@@ -11,6 +11,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   test:
+    if: github.repository == 'entropicalabs/openqaoa'
     strategy:
       fail-fast: false
       matrix:
@@ -77,6 +78,7 @@ jobs:
 
 
   docs:
+    if: github.repository == 'entropicalabs/openqaoa'
     runs-on: ubuntu-latest
     steps:
       - name: Check out openqaoa

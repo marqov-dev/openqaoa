@@ -1,3 +1,34 @@
+# OpenQAOA: Marqov core restoration
+
+This public fork restores the local core of [Entropica Labs' OpenQAOA](https://github.com/entropicalabs/openqaoa).
+OpenQAOA remains Entropica Labs' project; original authorship and MIT licensing are preserved.
+The restoration covers Python **3.11 and 3.12**, the built-in `vectorized` and
+depth-one `analytical_simulator` backends, and local QAOA/RQAOA workflows.
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install ./src/openqaoa-core
+python examples/core_maxcut.py
+```
+
+Clone this fork first: `git clone https://github.com/marqov-dev/openqaoa.git`, then `cd openqaoa`.
+While the candidate is under review, run `git checkout codex/core-restoration` before installing.
+Install the **core subdirectory**, rather than the root metapackage or the upstream PyPI package.
+This source candidate identifies itself as `0.2.6+marqov.1`; no Marqov package has been published to PyPI.
+
+See [RESTORATION.md](RESTORATION.md) for dependency constraints, contributor commands,
+supported scope, and the upstream contribution plan. The provider plugins, Mitiq ZNE,
+CPLEX runtime, notebooks and historical full-stack install commands below are outside
+this restoration's verified scope. No cloud credentials or paid hardware runs are needed.
+
+[![Restored core CI](https://github.com/marqov-dev/openqaoa/actions/workflows/core.yml/badge.svg)](https://github.com/marqov-dev/openqaoa/actions/workflows/core.yml)
+
+## Original upstream overview and historical instructions
+
+The material below describes the upstream distribution, including its historical
+installation paths and integrations. Its badges refer to upstream, not this fork's validation.
+
 <div align="center">
 
 <picture>

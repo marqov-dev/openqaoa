@@ -1,3 +1,28 @@
+# OpenQAOA core: Marqov restoration candidate
+
+This is Marqov's restoration of the local core of Entropica Labs' OpenQAOA.
+Original authorship and MIT licensing are preserved. The candidate version is
+`0.2.6+marqov.1`, built from this fork; installing upstream's PyPI package does not
+install these changes. No Marqov PyPI release has been made.
+
+Supported targets are Python 3.11/3.12 and the built-in `vectorized` and
+depth-one `analytical_simulator` backends. QAOA/RQAOA core workflows run without
+Mitiq, Qiskit, provider plugins, credentials, or a CPLEX runtime.
+
+From the repository root, in an isolated Python 3.11 or 3.12 environment:
+
+```bash
+python -m pip install ./src/openqaoa-core
+python examples/core_maxcut.py
+```
+
+For contributors, `python -m pip install -e ./src/openqaoa-core` is supported.
+See [the restoration guide](https://github.com/marqov-dev/openqaoa/blob/codex/core-restoration/RESTORATION.md)
+for test commands, dependency bounds and maintenance scope.
+Provider integrations and ZNE are unverified in this candidate.
+The upstream overview below is retained as historical documentation and does not
+extend that support scope.
+
 <div align="center">
 
 <picture>

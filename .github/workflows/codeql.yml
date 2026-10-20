@@ -26,6 +26,7 @@ on:
 
 jobs:
   analyze:
+    if: github.repository == 'entropicalabs/openqaoa'
     name: Analyze
     runs-on: ubuntu-latest
     permissions:

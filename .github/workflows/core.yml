@@ -1,0 +1,63 @@
+name: Restored core
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: restored-core-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Core / ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ['3.11', '3.12']
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Build source distribution and wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build src/openqaoa-core --outdir dist
+      - name: Install built wheel and local test dependencies
+        run: python -m pip install dist/*.whl pytest==8.4.2 plotly
+      - name: Verify installation outside checkout
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -m pip check
+          python -c 'from openqaoa import QAOA, RQAOA; from importlib.metadata import version; print(version("openqaoa-core"))'
+      - name: Test core without cloud providers or CPLEX runtime
+        run: >-
+          python -m pytest src/openqaoa-core/tests tests/test_core_restoration.py
+          -m 'not (cplex or qpu or sim or qvm or api or docker_aws or braket_api or notebook)'
+          -q -rs --junitxml=core-tests.xml
+      - name: Run simulator experiment and classical baselines
+        run: python examples/core_maxcut.py > core-maxcut.json
+      - name: Record resolved dependencies
+        if: always()
+        run: python -m pip freeze > core-dependencies.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-${{ matrix.os }}-py${{ matrix.python }}
+          path: |
+            dist/
+            core-tests.xml
+            core-maxcut.json
+            core-dependencies.txt

@@ -90,7 +90,7 @@ class MaximumCut(Problem):
             # We expect the edge weight to be given in the attribute called
             # "weight". If it is None, assume a weight of 1.0
             weights.append(
-                edge_weight if edge_weight else MaximumCut.DEFAULT_EDGE_WEIGHT
+                edge_weight if edge_weight is not None else MaximumCut.DEFAULT_EDGE_WEIGHT
             )
 
         return QUBO(self.G.number_of_nodes(), terms, weights, self.problem_instance)
