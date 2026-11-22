@@ -10,7 +10,7 @@ from ..ansatz_constructor.baseparams import shapedArray
 
 
 class QAOAVariationalExtendedParams(QAOAVariationalBaseParams):
-    """
+    r"""
     QAOA parameters in their most general form with different angles for each
     operator.
 

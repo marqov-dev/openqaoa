@@ -14,7 +14,7 @@ class FromDocplex2IsingModel(object):
         unbalanced_const: bool = False,
         strength_ineq: list = [0.1, 0.5],
     ):
-        """
+        r"""
         Creates an instance to translate Docplex models to its Ising Model representation
 
         Parameters

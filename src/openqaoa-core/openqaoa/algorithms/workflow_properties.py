@@ -1,9 +1,12 @@
 from typing import List, Optional, Union
 import numpy as np
 import json
-from scipy.optimize._minimize import MINIMIZE_METHODS
 
-from ..optimizers.training_vqa import CustomScipyGradientOptimizer, PennyLaneOptimizer
+from ..optimizers.training_vqa import (
+    SCIPY_MINIMIZE_METHODS,
+    CustomScipyGradientOptimizer,
+    PennyLaneOptimizer,
+)
 from ..backends.devices_core import SUPPORTED_LOCAL_SIMULATORS
 from ..backends.basebackend import QuantumCircuitBase
 from ..utilities import convert2serialize
@@ -22,7 +25,7 @@ ALLOWED_INIT_TYPES = ["rand", "ramp", "custom"]
 ALLOWED_MIXERS = ["x", "xy"]
 
 ALLOWED_MINIMIZATION_METHODS = (
-    MINIMIZE_METHODS
+    SCIPY_MINIMIZE_METHODS
     + CustomScipyGradientOptimizer.CUSTOM_GRADIENT_OPTIMIZERS
     + PennyLaneOptimizer.PENNYLANE_OPTIMIZERS
 )

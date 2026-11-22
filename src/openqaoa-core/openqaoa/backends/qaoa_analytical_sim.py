@@ -1,6 +1,8 @@
 """
 Energy expectation as a function of angles computed accordingly to the analytical expression for p=1.
 """
+import numpy as np
+
 from .basebackend import QAOABaseBackend
 from ..qaoa_components import (
     QAOADescriptor,
@@ -110,7 +112,10 @@ class QAOABackendAnalyticalSimulator(QAOABaseBackend):
         gammas = params.gammas
 
         cost = energy_expectation_analytical([betas, gammas], self.cost_hamiltonian)
-        return cost
+        # p = 1, so betas and gammas are length-1 arrays and so is cost. Return the number the
+        # signature promises: NumPy 2.5 no longer converts a 1-element array when it is stored
+        # into a scalar slot (QAOABenchmark does this).
+        return float(np.asarray(cost).item())
 
     def expectation_w_uncertainty(self, params):
         raise NotImplementedError("Not implemented yet. In progress.")

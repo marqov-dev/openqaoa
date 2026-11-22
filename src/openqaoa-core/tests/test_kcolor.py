@@ -138,8 +138,8 @@ class TestKColor(unittest.TestCase):
 
         # Verify the Docplex models are the same
         self.assertEqual(
-            kcolor_manual_prob.docplex_model.export_to_string(),
-            kcolor_random_prob.docplex_model.export_to_string(),
+            kcolor_manual_prob.docplex_model.export_as_lp_string(),
+            kcolor_random_prob.docplex_model.export_as_lp_string(),
         )
 
     def test_kcolor_type_checking(self):

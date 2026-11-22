@@ -554,8 +554,12 @@ class TestingRQAOAResultOutputs(unittest.TestCase):
                     rule, dict
                 ), "Elimination rule item is not a dictionary"
         assert isinstance(results["schedule"], list), "Schedule is not a list"
+        # Every spin is either eliminated or solved classically at the end. The final problem can be
+        # smaller than n_cutoff: an elimination step also removes spins it leaves isolated.
+        n_remaining = len(results["classical_output"]["optimal_states"][0])
+        assert n_remaining <= n_cutoff, "Final problem is larger than the cutoff"
         assert (
-            sum(results["schedule"]) + n_cutoff == n_qubits
+            sum(results["schedule"]) + n_remaining == n_qubits
         ), "Schedule is not correct"
         for step in results["intermediate_steps"]:
             assert isinstance(step["problem"], QUBO), "problem is not of type QUBO"
@@ -587,8 +591,12 @@ class TestingRQAOAResultOutputs(unittest.TestCase):
                     rule, dict
                 ), "Elimination rule item is not a dictionary"
         assert isinstance(results["schedule"], list), "Schedule is not a list"
+        # Every spin is either eliminated or solved classically at the end. The final problem can be
+        # smaller than n_cutoff: an elimination step also removes spins it leaves isolated.
+        n_remaining = len(results["classical_output"]["optimal_states"][0])
+        assert n_remaining <= n_cutoff, "Final problem is larger than the cutoff"
         assert (
-            sum(results["schedule"]) + n_cutoff == n_qubits
+            sum(results["schedule"]) + n_remaining == n_qubits
         ), "Schedule is not correct"
         for step in results["intermediate_steps"]:
             assert isinstance(step["problem"], QUBO), "QUBO is not of type QUBO"

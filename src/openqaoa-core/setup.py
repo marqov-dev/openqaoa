@@ -20,7 +20,7 @@ requirements_test = [r.strip() for r in requirements_test]
 
 setup(
     name="openqaoa-core",
-    python_requires=">=3.11, <3.13",
+    python_requires=">=3.11, <3.15",
     version=version,
     author="Entropica Labs",
     packages=find_packages(where="."),
@@ -36,6 +36,8 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Operating System :: OS Independent",
     ],
     keywords="quantum optimisation SDK",
