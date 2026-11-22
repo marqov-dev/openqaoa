@@ -1,4 +1,5 @@
 import unittest
+import networkx as nx
 import numpy as np
 
 from openqaoa.backends.qaoa_analytical_sim import QAOABackendAnalyticalSimulator
@@ -142,9 +143,27 @@ class TestingQAOABackendAnalyticalSimulator(unittest.TestCase):
         """
         Testing the whole rqaoa workflow if the device is set to 'analytical_simulator'.
         """
-        # Create a 3-regular weighted graph and a qubo problem
-        g = random_k_regular_graph(
-            degree=3, nodes=range(8), seed=2642, weighted=True, biases=False
+        # A fixed 3-regular weighted graph. It is the graph that
+        # random_k_regular_graph(degree=3, nodes=range(8), seed=2642, weighted=True, biases=False)
+        # produced with NetworkX 3.2.1, written out so the expected solution below does not depend
+        # on the NetworkX random-graph generator, which changed in later releases.
+        g = nx.Graph()
+        g.add_nodes_from([0, 7, 2, 4, 1, 5, 3, 6])
+        g.add_weighted_edges_from(
+            [
+                (0, 7, 0.5153745280678643),
+                (0, 3, 0.598585755944976),
+                (0, 5, 0.022852149104951813),
+                (7, 6, 0.18038320876756042),
+                (7, 4, 0.4602482671544581),
+                (2, 4, 0.26880794266132957),
+                (2, 1, 0.41021908152814635),
+                (2, 3, 0.6563129945594756),
+                (4, 6, 0.45437394596055636),
+                (1, 5, 0.9732837597263739),
+                (1, 6, 0.5814911687325247),
+                (5, 3, 0.7423931701787688),
+            ]
         )
         maxcut_qubo = MaximumCut(g).qubo
 

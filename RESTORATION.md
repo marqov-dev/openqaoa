@@ -7,10 +7,13 @@ It does not imply an agreed partnership or endorsement by Entropica Labs.
 
 ## Supported candidate
 
-The first candidate, `openqaoa-core==0.2.6+marqov.1`, targets CPython 3.11 and
-3.12 on Linux and macOS. CI builds a source distribution, builds a wheel from
-that distribution, installs the wheel, checks imports outside the checkout,
-and runs the core suite and the local MaxCut experiment.
+The candidate, `openqaoa-core==0.2.6+marqov.1`, targets CPython 3.11 to 3.14 on
+Linux and macOS. CI builds a source distribution, builds a wheel from that
+distribution, installs the wheel, checks imports outside the checkout, and runs
+the core suite and the local MaxCut experiment. It does this with the newest
+releases of every dependency on Python 3.11 to 3.14, and with the minimum
+supported NumPy, SciPy, NetworkX and docplex (`src/openqaoa-core/constraints-minimum.txt`)
+on Python 3.11 and 3.12.
 
 Covered functionality includes built-in statevector simulation, the depth-one
 analytical simulator, QAOA/RQAOA, parametrizations, optimizers, problem encodings
@@ -20,26 +23,32 @@ are compared independently for seeded, weighted instances.
 Benchmark heatmaps also use sample-centered mesh coordinates compatible with
 current Matplotlib; a regression checks that all values and sample centers survive plotting.
 
-The numerical compatibility window is intentionally bounded:
+Dependencies have lower bounds only. The table records what was needed to
+remove the earlier upper bounds.
 
-| Dependency | Candidate requirement | Reason |
+| Dependency | Requirement | Notes |
 | --- | --- | --- |
-| NumPy | `>=1.26.4,<2` | Python 3.12 support; NumPy 2 migration is deferred. |
-| SciPy | `>=1.11.2,<1.14` | Preserves the existing optimizer set and numerical regressions. SciPy 1.14 adds COBYQA to a private list used by this code; newer COBYLA changes also fail existing workflow regressions. |
-| NetworkX | `>=3.2.1,<3.3` | Preserves seeded graph ordering used by the RQAOA regression fixture. A newer version produced a different bitstring for that fixture. |
+| NumPy | `>=1.26.4` | NumPy 2 works. The analytical simulator returned a one-element array from `expectation()`; NumPy 2.5 rejects storing that in a scalar slot (it broke `QAOABenchmark`), so it now returns a float. |
+| SciPy | `>=1.11.2` | The optimizer list no longer comes from the private `scipy.optimize._minimize.MINIMIZE_METHODS`; OpenQAOA keeps its own list, including COBYQA (SciPy 1.14+). SciPy 1.16 reimplemented COBYLA, so COBYLA results differ from earlier releases (see below). |
+| NetworkX | `>=3.2.1` | NetworkX 3.3+ builds a different random regular graph from the same seed. The RQAOA regression test now writes out the graph it uses instead of generating it. |
+| docplex | `>=2.32.264` | docplex 2.25 uses `np.float_`, which NumPy 2 removed. |
 
-These bounds are compatibility decisions, not a claim that all dependency versions
-have been validated. Each CI artifact records the exact resolved environment.
-Broad dependency modernization, including removal of private SciPy APIs and making
-seeded graph fixtures independent of NetworkX ordering, is follow-up work.
+**COBYLA in SciPy 1.16 and later.** The new implementation optimizes the default
+workflow further: on the six-vertex ring minimum vertex cover it reaches an expected
+cost of 5.5 where the old one stopped at 14.2. With a penalty of 10 per uncovered
+edge, that better-optimized state's most probable bitstring is the all-ones cover,
+which is valid but not minimal. The old regression only found a minimum cover
+because COBYLA stopped early. The test now checks that the cost falls and that the
+most probable state is a vertex cover. Expect different COBYLA results, and
+sometimes different RQAOA elimination schedules, across this SciPy boundary.
+
+Each CI artifact records the exact resolved environment.
 
 ## Install and reproduce
 
 ```bash
 git clone https://github.com/marqov-dev/openqaoa.git
 cd openqaoa
-# For the review candidate, check out codex/core-restoration before installing.
-git checkout codex/core-restoration
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip build
@@ -71,7 +80,7 @@ The root `openqaoa` metapackage and the Azure, Braket, PyQuil and Qiskit plugins
 retain their upstream metadata and are **not supported by this candidate**.
 Their presence in the repository is not evidence of compatibility. Do not use
 the historical `make local-install` or root `pip install .` path for this core.
-Windows, Python 3.13+, NumPy 2, provider API migrations, Mitiq ZNE, hardware runs,
+Windows, Python 3.15+, provider API migrations, Mitiq ZNE, hardware runs,
 and full notebook/documentation builds need separate validation.
 
 ZNE dependencies now load only when constructing `ZNEWrapper`. Missing optional

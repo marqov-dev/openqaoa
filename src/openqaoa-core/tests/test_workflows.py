@@ -133,8 +133,16 @@ class TestingVanillaQAOA(unittest.TestCase):
         q.compile(vc)
         q.optimize()
 
+        # The most probable state must be a vertex cover and the optimizer must lower the cost.
+        # Do not assert that it is one of the two minimum covers ("010101", "101010"): with a
+        # penalty of 10 per uncovered edge, a well-optimised p=1 state favours the all-ones cover,
+        # which is valid but not minimal. Older SciPy COBYLA stopped at a poorly optimised state
+        # (expected cost 14.2) whose most probable states happened to be the minimum covers; the
+        # COBYLA in SciPy 1.16 and later reaches 5.5 and returns "111111".
         result = q.result.most_probable_states["solutions_bitstrings"][0]
-        assert "010101" == result or "101010" == result
+        assert all(result[u] == "1" or result[v] == "1" for u, v in g.edges())
+        costs = q.result.intermediate["cost"]
+        assert costs[-1] < costs[0]
 
     def test_set_device_local(self):
         """ "

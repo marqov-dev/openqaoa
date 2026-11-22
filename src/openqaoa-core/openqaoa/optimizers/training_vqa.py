@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import Type, Callable, List
 from datetime import datetime
 
-from scipy.optimize._minimize import minimize, MINIMIZE_METHODS
+from scipy.optimize import minimize
 from scipy.optimize import LinearConstraint, NonlinearConstraint, Bounds
 
 from ..backends.basebackend import VQABaseBackend
@@ -322,6 +322,28 @@ class OptimizeVQA(ABC):
         return  # result_dict
 
 
+# The scipy.optimize.minimize methods ScipyOptimizer accepts. Listed here rather than read from
+# scipy.optimize._minimize.MINIMIZE_METHODS, which is private and changes between SciPy releases
+# (1.14 added "cobyqa"). "cobyqa" needs SciPy 1.14 or later; on older SciPy, minimize rejects it.
+SCIPY_MINIMIZE_METHODS = [
+    "nelder-mead",
+    "powell",
+    "cg",
+    "bfgs",
+    "newton-cg",
+    "l-bfgs-b",
+    "tnc",
+    "cobyla",
+    "cobyqa",
+    "slsqp",
+    "trust-constr",
+    "dogleg",
+    "trust-ncg",
+    "trust-exact",
+    "trust-krylov",
+]
+
+
 class ScipyOptimizer(OptimizeVQA):
     """
     Python vanilla scipy based optimizer for the VQA class.
@@ -351,8 +373,8 @@ class ScipyOptimizer(OptimizeVQA):
         * 'optimizer_options': dictionary of optimiser-specific arguments, defaults to ``None``
     """
 
-    GRADIENT_FREE = ["cobyla", "nelder-mead", "powell", "slsqp"]
-    SCIPY_METHODS = MINIMIZE_METHODS
+    GRADIENT_FREE = ["cobyla", "cobyqa", "nelder-mead", "powell", "slsqp"]
+    SCIPY_METHODS = SCIPY_MINIMIZE_METHODS
 
     def __init__(
         self,

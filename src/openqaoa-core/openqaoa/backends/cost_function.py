@@ -7,7 +7,7 @@ from ..utilities import bitstring_energy
 
 
 def expectation_value_classical(counts: Dict, hamiltonian: Hamiltonian):
-    """
+    r"""
     Evaluate the cost function, i.e. expectation value ``$$\langle|H \rangle$$``
     w.r.t to the measurements results ``counts``.
 

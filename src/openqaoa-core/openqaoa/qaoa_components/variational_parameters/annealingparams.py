@@ -9,7 +9,7 @@ from ..ansatz_constructor.baseparams import shapedArray
 
 
 class QAOAVariationalAnnealingParams(QAOAVariationalBaseParams):
-    """
+    r"""
     QAOA parameters that implement a state preparation circuit of the form
 
     .. math::
@@ -17,7 +17,7 @@ class QAOAVariationalAnnealingParams(QAOAVariationalBaseParams):
         U = e^{-i (1-s(t_p)) H_M \Delta t} e^{-i s(t_p) H_C \Delta t} \cdots e^{-i(1-s(t_1)H_M \Delta t} e^{-i s(t_1) H_C \Delta t}
 
     where the :math:`s(t_i) =: s_i` are the variable parameters and
-    :math:`\\Delta t= \\frac{T}{N}`.
+    :math:`\Delta t= \frac{T}{N}`.
     So the schedule is specified by specifying s(t) at evenly spaced timelayers.
 
     Parameters

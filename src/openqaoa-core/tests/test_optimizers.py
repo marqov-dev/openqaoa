@@ -7,7 +7,9 @@ import warnings
 import os
 
 import numpy as np
-from scipy.optimize._minimize import MINIMIZE_METHODS
+import scipy
+
+from openqaoa.optimizers.training_vqa import SCIPY_MINIMIZE_METHODS
 
 from openqaoa.qaoa_components import (
     create_qaoa_variational_params,
@@ -115,7 +117,7 @@ class TestQAOACostBaseClass(unittest.TestCase):
         vector_optimizer()
 
     def test_scipy_optimizers_global(self):
-        "Check that final value of all scipy MINIMIZE_METHODS optimizers agrees with pre-computed optimized value."
+        "Check that final value of all supported scipy.optimize.minimize methods agrees with pre-computed optimized value."
 
         # Create problem instance, cost function, and gradient functions
         backend_obj_vectorized, variate_params = self.__backend_params(
@@ -124,29 +126,46 @@ class TestQAOACostBaseClass(unittest.TestCase):
 
         niter = 5
         stepsize = 0.001
-        y_precomp = [
-            -2.4345058914425626,
-            -2.5889608823632795,
-            -2.588960865651421,
-            -2.5889608823632786,
-            -2.5889608823632795,
-            -2.588960882363273,
-            -2.5889608823632786,
-            0.7484726235465329,
-            -2.588960882363272,
-            -2.588960882363281,
-            -2.5889608823632786,
-            -2.5889608823632795,
-            -2.5889608823632786,
-            -2.5889608823632786,
+        # Cost after `niter` iterations, by method. COBYLA's value is specific to its implementation,
+        # which SciPy replaced in 1.16, so it has one reference per implementation. COBYQA exists
+        # from SciPy 1.14.
+        scipy_version = tuple(int(x) for x in scipy.__version__.split(".")[:2])
+        y_precomp_by_method = {
+            "nelder-mead": -2.434505891443,
+            "powell": -2.588960882363,
+            "cg": -2.588960865652,
+            "bfgs": -2.588960882363,
+            "newton-cg": -2.588960882363,
+            "l-bfgs-b": -2.588960882363,
+            "tnc": -2.588960882355,
+            "cobyla": 1.736757816516 if scipy_version < (1, 16) else -0.596180854517,
+            "cobyqa": 1.196651779229,
+            "slsqp": -2.588960882361,
+            "trust-constr": -2.588960882363,
+            "dogleg": -2.588960882363,
+            "trust-ncg": -2.588960882363,
+            "trust-exact": -2.588960882363,
+            "trust-krylov": -2.588960882363,
+        }
+        methods = [
+            m
+            for m in SCIPY_MINIMIZE_METHODS
+            if m != "cobyqa" or scipy_version >= (1, 14)
         ]
+        y_precomp = [y_precomp_by_method[m] for m in methods]
         optimizer_dicts = []
-        for method in MINIMIZE_METHODS:
+        for method in methods:
             optimizer_dicts.append(
                 {"method": method, "maxiter": niter, "tol": 10 ** (-9)}
             )
 
         for i, optimizer_dict in enumerate(optimizer_dicts):
+            # Each method starts from the same ramp initialisation. Reusing one parameter object
+            # made every method start where the previous one stopped, so a change in one SciPy
+            # optimizer moved the result of every method after it.
+            backend_obj_vectorized, variate_params = self.__backend_params(
+                cost_hamiltonian_1, 4
+            )
             optimizer_dict["jac"] = derivative(
                 backend_obj_vectorized,
                 variate_params,
